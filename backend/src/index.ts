@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { createApiServer } from "./api";
 import { getDb } from "./db";
 

@@ -1,7 +1,9 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import crypto from "crypto";
 import { getDb } from "./db";
+import { runSalesScan } from "./ai-scan";
 
 export function createApiServer(port: number = 18800) {
   const app = express();
@@ -118,16 +120,20 @@ export function createApiServer(port: number = 18800) {
   // --- Scan ---
   let scanRunning = false;
 
-  app.post("/api/scan", (req, res) => {
+  app.post("/api/scan", async (req, res) => {
     const userId = getUserId(req, res);
     if (!userId) return;
     if (scanRunning) return res.status(409).json({ error: "Scan already running" });
     scanRunning = true;
-    // In a real OpenClaw integration, this would trigger the agent.
-    // For the MVP, we simulate by setting a flag and returning.
-    // The actual scan would be triggered via OpenClaw's agent system.
-    setTimeout(() => { scanRunning = false; }, 60000);
-    res.json({ ok: true, message: "Scan started" });
+    try {
+      const result = await runSalesScan(userId);
+      res.json(result);
+    } catch (err: any) {
+      console.error("Scan error:", err);
+      res.status(500).json({ error: "Scan failed", message: err.message });
+    } finally {
+      scanRunning = false;
+    }
   });
 
   app.get("/api/scan/status", (_req, res) => {
