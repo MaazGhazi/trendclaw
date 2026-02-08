@@ -5,7 +5,7 @@ import crypto from "crypto";
 import { getDb } from "./db";
 import { runSalesScan } from "./ai-scan";
 
-export function createApiServer(port: number = 18800) {
+export function createApiServer(port: number = 18800): void {
   const app = express();
   app.use(cors({ origin: true, credentials: true }));
   app.use(express.json());
@@ -144,5 +144,4 @@ export function createApiServer(port: number = 18800) {
     console.log(`OpportunityClaw API running on port ${port}`);
   });
 
-  return app;
 }
